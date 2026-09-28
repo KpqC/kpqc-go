@@ -1,4 +1,4 @@
-# KpqC
+# Deprecated: use kpqc.dev
 
 > [!WARNING]
 > The `github.com/KpqC/kpqc-go` module path is deprecated and no longer

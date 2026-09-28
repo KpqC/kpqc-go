@@ -1,5 +1,4 @@
-// Package kpqc provides synchronous Go APIs for the KpqC AIMer, HAETAE,
-// NTRU+, and SMAUG-T post-quantum algorithms.
+// Package kpqc is deprecated; use kpqc.dev instead.
 //
 // Deprecated: use kpqc.dev instead.
 package kpqc
