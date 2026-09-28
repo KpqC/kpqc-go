@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/KpqC/kpqc-go"
+	"kpqc.dev"
 )
 
 func ExampleSignatureAlgorithm() {

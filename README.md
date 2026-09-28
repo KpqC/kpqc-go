@@ -11,7 +11,7 @@ KpqC provides synchronous Go APIs for AIMer, HAETAE, NTRU+, and SMAUG-T.
 ## Install
 
 ```sh
-go get github.com/KpqC/kpqc-go
+go get kpqc.dev
 ```
 
 The package contains the native algorithm sources under `third_party/` and
@@ -35,7 +35,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/KpqC/kpqc-go"
+	"kpqc.dev"
 )
 
 func main() {

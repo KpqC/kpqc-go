@@ -1,3 +1,3 @@
-module github.com/KpqC/kpqc-go
+module kpqc.dev
 
 go 1.22
