@@ -1,5 +1,9 @@
 # KpqC
 
+> [!WARNING]
+> The `github.com/KpqC/kpqc-go` module path is deprecated and no longer
+> maintained. Use [`kpqc.dev`](https://pkg.go.dev/kpqc.dev) instead.
+
 KpqC provides synchronous Go APIs for AIMer, HAETAE, NTRU+, and SMAUG-T.
 
 ## Runtime support
@@ -11,7 +15,7 @@ KpqC provides synchronous Go APIs for AIMer, HAETAE, NTRU+, and SMAUG-T.
 ## Install
 
 ```sh
-go get github.com/KpqC/kpqc-go
+go get kpqc.dev
 ```
 
 The package contains the native algorithm sources under `third_party/` and
@@ -35,7 +39,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/KpqC/kpqc-go"
+	"kpqc.dev"
 )
 
 func main() {
