@@ -44,8 +44,7 @@ type SignatureSizes struct {
 	Signature int
 }
 
-// KEMSizes describes the fixed-size values used by a key-encapsulation
-// mechanism.
+// KEMSizes describes the fixed-size values used by a KEM.
 type KEMSizes struct {
 	PublicKey    int
 	SecretKey    int
@@ -66,7 +65,7 @@ type SignatureAlgorithm interface {
 	VerifyWithContext(message, signature, publicKey, context []byte) (bool, error)
 }
 
-// KEMAlgorithm is a key-encapsulation mechanism.
+// KEMAlgorithm is a key encapsulation mechanism (KEM).
 type KEMAlgorithm interface {
 	ID() string
 	Sizes() KEMSizes

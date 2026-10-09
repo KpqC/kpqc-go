@@ -68,25 +68,25 @@ func HAETAE3() SignatureAlgorithm { return haetae3Algorithm }
 // HAETAE5 returns the HAETAE mode-5 signature algorithm.
 func HAETAE5() SignatureAlgorithm { return haetae5Algorithm }
 
-// NTRUPlus768 returns the NTRU+768 key-encapsulation mechanism.
+// NTRUPlus768 returns the NTRU+768 KEM.
 func NTRUPlus768() KEMAlgorithm { return ntruplus768Algorithm }
 
-// NTRUPlus864 returns the NTRU+864 key-encapsulation mechanism.
+// NTRUPlus864 returns the NTRU+864 KEM.
 func NTRUPlus864() KEMAlgorithm { return ntruplus864Algorithm }
 
-// NTRUPlus1152 returns the NTRU+1152 key-encapsulation mechanism.
+// NTRUPlus1152 returns the NTRU+1152 KEM.
 func NTRUPlus1152() KEMAlgorithm { return ntruplus1152Algorithm }
 
-// SMAUGT128 returns the SMAUG-T128 key-encapsulation mechanism.
+// SMAUGT128 returns the SMAUG-T128 KEM.
 func SMAUGT128() KEMAlgorithm { return smaugt128Algorithm }
 
-// SMAUGT192 returns the SMAUG-T192 key-encapsulation mechanism.
+// SMAUGT192 returns the SMAUG-T192 KEM.
 func SMAUGT192() KEMAlgorithm { return smaugt192Algorithm }
 
-// SMAUGT256 returns the SMAUG-T256 key-encapsulation mechanism.
+// SMAUGT256 returns the SMAUG-T256 KEM.
 func SMAUGT256() KEMAlgorithm { return smaugt256Algorithm }
 
-// TiMER returns the TiMER key-encapsulation mechanism.
+// TiMER returns the TiMER KEM.
 func TiMER() KEMAlgorithm { return timerAlgorithm }
 
 // SignatureAlgorithms returns every supported signature parameter set.
@@ -97,7 +97,7 @@ func SignatureAlgorithms() []SignatureAlgorithm {
 	}
 }
 
-// KEMAlgorithms returns every supported key-encapsulation parameter set.
+// KEMAlgorithms returns every supported KEM parameter set.
 func KEMAlgorithms() []KEMAlgorithm {
 	return []KEMAlgorithm{
 		NTRUPlus768(), NTRUPlus864(), NTRUPlus1152(),

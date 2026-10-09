@@ -1,6 +1,7 @@
 # KpqC
 
-KpqC provides synchronous Go APIs for AIMer, HAETAE, NTRU+, and SMAUG-T.
+KpqC provides synchronous Go APIs for the AIMer and HAETAE signature schemes
+and the NTRU+ and SMAUG-T key encapsulation mechanisms (KEMs).
 
 ## Runtime support
 
@@ -23,8 +24,8 @@ builds them through cgo. It does not download native libraries during a build.
 | --- | --- | --- |
 | **AIMer** | Signature | `AIMer128f`, `AIMer128s`, `AIMer192f`, `AIMer192s`, `AIMer256f`, `AIMer256s` |
 | **HAETAE** | Signature | `HAETAE2`, `HAETAE3`, `HAETAE5` |
-| **NTRU+** | Key encapsulation | `NTRUPlus768`, `NTRUPlus864`, `NTRUPlus1152` |
-| **SMAUG&#8209;T** | Key encapsulation | `SMAUGT128`, `SMAUGT192`, `SMAUGT256`, `TiMER` |
+| **NTRU+** | KEM | `NTRUPlus768`, `NTRUPlus864`, `NTRUPlus1152` |
+| **SMAUG&#8209;T** | KEM | `SMAUGT128`, `SMAUGT192`, `SMAUGT256`, `TiMER` |
 
 ### Signatures
 
@@ -63,7 +64,10 @@ func main() {
 application context of at most 255 bytes. Verification fails when the supplied
 context does not match the one used for signing.
 
-### Key encapsulation
+### KEM
+
+A KEM creates a shared secret for a sender and a recipient. The public key may
+be distributed; the secret key and resulting shared secret must remain private.
 
 ```go
 algorithm := kpqc.SMAUGT192()
@@ -118,7 +122,7 @@ All sizes are in bytes.
 | `HAETAE3` | 1,472 | 2,112 | 2,349 |
 | `HAETAE5` | 2,080 | 2,752 | 2,948 |
 
-#### Key encapsulation
+#### KEM
 
 | Accessor | Public key | Secret key | Ciphertext | Shared secret |
 | --- | ---: | ---: | ---: | ---: |
