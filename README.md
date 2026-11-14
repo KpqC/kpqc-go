@@ -6,8 +6,7 @@ and the NTRU+ and SMAUG-T key encapsulation mechanisms (KEMs).
 ## Runtime support
 
 - Go 1.22 or newer
-- cgo and a C11 compiler
-- macOS or Linux
+- Any Go-supported target with a working source of operating-system randomness
 
 ## Install
 
@@ -15,8 +14,9 @@ and the NTRU+ and SMAUG-T key encapsulation mechanisms (KEMs).
 go get kpqc.dev
 ```
 
-The package contains the native algorithm sources under `third_party/` and
-builds them through cgo. It does not download native libraries during a build.
+The algorithms are implemented in Go and do not require cgo, a C compiler, or
+downloaded native libraries. The exact upstream reference revisions and their
+license texts are recorded in `THIRD_PARTY_NOTICES.md` and `LICENSES/`.
 
 ## Available schemes
 
@@ -97,10 +97,12 @@ fmt.Println(bytes.Equal(inboundSecret, outbound.SharedSecret)) // true
 Keys, signatures, ciphertexts, messages, contexts, and shared secrets use
 `[]byte`. Every operation that can fail returns an error. Wrong-sized inputs
 wrap `ErrInvalidSize`, contexts over 255 bytes wrap `ErrContextTooLong`, and
-native failures return `*NativeError`.
+algorithm implementation failures return `*NativeError`. The type name is
+retained for API compatibility.
 
 Signature verification returns `false, nil` for an invalid signature. NTRU+
-returns a native error for a non-canonical public key or invalid ciphertext.
+returns an implementation error for a non-canonical public key or invalid
+ciphertext.
 SMAUG-T performs implicit rejection and returns a replacement secret for an
 invalid ciphertext; that value does not equal the sender's shared secret.
 
@@ -149,9 +151,14 @@ go test ./...
 go test -tags=kpqc_kat ./...
 ```
 
+Set `KPQC_KAT_LIMIT` to a value from 1 through 100 to run only that many
+records per parameter set during local development. Omitting it always checks
+all 1,600 records.
+
 ## Security
 
-The native cores are compiled from the upstream algorithm implementations.
+The portable Go cores follow the upstream algorithm implementations and use
+explicit byte-order conversions for architecture-independent serialization.
 This package has not received an independent security audit and does not
 provide a constant-time execution guarantee. Assess those constraints before
 using it with sensitive production keys.

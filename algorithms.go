@@ -1,44 +1,32 @@
 package kpqc
 
 import (
-	"kpqc.dev/internal/native/aimer128f"
-	"kpqc.dev/internal/native/aimer128s"
-	"kpqc.dev/internal/native/aimer192f"
-	"kpqc.dev/internal/native/aimer192s"
-	"kpqc.dev/internal/native/aimer256f"
-	"kpqc.dev/internal/native/aimer256s"
-	"kpqc.dev/internal/native/haetae2"
-	"kpqc.dev/internal/native/haetae3"
-	"kpqc.dev/internal/native/haetae5"
-	"kpqc.dev/internal/native/ntruplus1152"
-	"kpqc.dev/internal/native/ntruplus768"
-	"kpqc.dev/internal/native/ntruplus864"
-	"kpqc.dev/internal/native/smaugt128"
-	"kpqc.dev/internal/native/smaugt192"
-	"kpqc.dev/internal/native/smaugt256"
-	"kpqc.dev/internal/native/timer"
+	"kpqc.dev/internal/portable/aimer"
+	"kpqc.dev/internal/portable/haetae"
+	"kpqc.dev/internal/portable/ntruplus"
+	"kpqc.dev/internal/portable/smaugt"
 )
 
 var (
-	aimer128fAlgorithm = newSignature("aimer-128f", SignatureSizes{32, 48, 6944}, signatureBackend{aimer128f.KeyPair, aimer128f.Sign, aimer128f.Verify})
-	aimer128sAlgorithm = newSignature("aimer-128s", SignatureSizes{32, 48, 4704}, signatureBackend{aimer128s.KeyPair, aimer128s.Sign, aimer128s.Verify})
-	aimer192fAlgorithm = newSignature("aimer-192f", SignatureSizes{48, 72, 15408}, signatureBackend{aimer192f.KeyPair, aimer192f.Sign, aimer192f.Verify})
-	aimer192sAlgorithm = newSignature("aimer-192s", SignatureSizes{48, 72, 10320}, signatureBackend{aimer192s.KeyPair, aimer192s.Sign, aimer192s.Verify})
-	aimer256fAlgorithm = newSignature("aimer-256f", SignatureSizes{64, 96, 31360}, signatureBackend{aimer256f.KeyPair, aimer256f.Sign, aimer256f.Verify})
-	aimer256sAlgorithm = newSignature("aimer-256s", SignatureSizes{64, 96, 20224}, signatureBackend{aimer256s.KeyPair, aimer256s.Sign, aimer256s.Verify})
+	aimer128fAlgorithm = newSignature("aimer-128f", SignatureSizes{32, 48, 6944}, signatureBackend{aimer.KeyPair128F, aimer.Sign128F, aimer.Verify128F})
+	aimer128sAlgorithm = newSignature("aimer-128s", SignatureSizes{32, 48, 4704}, signatureBackend{aimer.KeyPair128S, aimer.Sign128S, aimer.Verify128S})
+	aimer192fAlgorithm = newSignature("aimer-192f", SignatureSizes{48, 72, 15408}, signatureBackend{aimer.KeyPair192F, aimer.Sign192F, aimer.Verify192F})
+	aimer192sAlgorithm = newSignature("aimer-192s", SignatureSizes{48, 72, 10320}, signatureBackend{aimer.KeyPair192S, aimer.Sign192S, aimer.Verify192S})
+	aimer256fAlgorithm = newSignature("aimer-256f", SignatureSizes{64, 96, 31360}, signatureBackend{aimer.KeyPair256F, aimer.Sign256F, aimer.Verify256F})
+	aimer256sAlgorithm = newSignature("aimer-256s", SignatureSizes{64, 96, 20224}, signatureBackend{aimer.KeyPair256S, aimer.Sign256S, aimer.Verify256S})
 
-	haetae2Algorithm = newSignature("haetae-mode2", SignatureSizes{992, 1408, 1474}, signatureBackend{haetae2.KeyPair, haetae2.Sign, haetae2.Verify})
-	haetae3Algorithm = newSignature("haetae-mode3", SignatureSizes{1472, 2112, 2349}, signatureBackend{haetae3.KeyPair, haetae3.Sign, haetae3.Verify})
-	haetae5Algorithm = newSignature("haetae-mode5", SignatureSizes{2080, 2752, 2948}, signatureBackend{haetae5.KeyPair, haetae5.Sign, haetae5.Verify})
+	haetae2Algorithm = newSignature("haetae-mode2", SignatureSizes{992, 1408, 1474}, signatureBackend{haetae.KeyPair2, haetae.Sign2, haetae.Verify2})
+	haetae3Algorithm = newSignature("haetae-mode3", SignatureSizes{1472, 2112, 2349}, signatureBackend{haetae.KeyPair3, haetae.Sign3, haetae.Verify3})
+	haetae5Algorithm = newSignature("haetae-mode5", SignatureSizes{2080, 2752, 2948}, signatureBackend{haetae.KeyPair5, haetae.Sign5, haetae.Verify5})
 
-	ntruplus768Algorithm  = newKEM("NTRU+768", KEMSizes{1152, 2336, 1152, 32}, kemBackend{ntruplus768.KeyPair, ntruplus768.Encapsulate, ntruplus768.Decapsulate})
-	ntruplus864Algorithm  = newKEM("NTRU+864", KEMSizes{1296, 2624, 1296, 32}, kemBackend{ntruplus864.KeyPair, ntruplus864.Encapsulate, ntruplus864.Decapsulate})
-	ntruplus1152Algorithm = newKEM("NTRU+1152", KEMSizes{1728, 3488, 1728, 32}, kemBackend{ntruplus1152.KeyPair, ntruplus1152.Encapsulate, ntruplus1152.Decapsulate})
+	ntruplus768Algorithm  = newKEM("NTRU+768", KEMSizes{1152, 2336, 1152, 32}, kemBackend{ntruplus.KeyPair768, ntruplus.Encapsulate768, ntruplus.Decapsulate768})
+	ntruplus864Algorithm  = newKEM("NTRU+864", KEMSizes{1296, 2624, 1296, 32}, kemBackend{ntruplus.KeyPair864, ntruplus.Encapsulate864, ntruplus.Decapsulate864})
+	ntruplus1152Algorithm = newKEM("NTRU+1152", KEMSizes{1728, 3488, 1728, 32}, kemBackend{ntruplus.KeyPair1152, ntruplus.Encapsulate1152, ntruplus.Decapsulate1152})
 
-	smaugt128Algorithm = newKEM("SMAUG-T128", KEMSizes{672, 832, 672, 32}, kemBackend{smaugt128.KeyPair, smaugt128.Encapsulate, smaugt128.Decapsulate})
-	smaugt192Algorithm = newKEM("SMAUG-T192", KEMSizes{1088, 1312, 992, 32}, kemBackend{smaugt192.KeyPair, smaugt192.Encapsulate, smaugt192.Decapsulate})
-	smaugt256Algorithm = newKEM("SMAUG-T256", KEMSizes{1440, 1728, 1376, 32}, kemBackend{smaugt256.KeyPair, smaugt256.Encapsulate, smaugt256.Decapsulate})
-	timerAlgorithm     = newKEM("TiMER", KEMSizes{672, 832, 608, 32}, kemBackend{timer.KeyPair, timer.Encapsulate, timer.Decapsulate})
+	smaugt128Algorithm = newKEM("SMAUG-T128", KEMSizes{672, 832, 672, 32}, kemBackend{smaugt.KeyPair128, smaugt.Encapsulate128, smaugt.Decapsulate128})
+	smaugt192Algorithm = newKEM("SMAUG-T192", KEMSizes{1088, 1312, 992, 32}, kemBackend{smaugt.KeyPair192, smaugt.Encapsulate192, smaugt.Decapsulate192})
+	smaugt256Algorithm = newKEM("SMAUG-T256", KEMSizes{1440, 1728, 1376, 32}, kemBackend{smaugt.KeyPair256, smaugt.Encapsulate256, smaugt.Decapsulate256})
+	timerAlgorithm     = newKEM("TiMER", KEMSizes{672, 832, 608, 32}, kemBackend{smaugt.KeyPairTiMER, smaugt.EncapsulateTiMER, smaugt.DecapsulateTiMER})
 )
 
 // AIMer128f returns the AIMer-128f signature algorithm.

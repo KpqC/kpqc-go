@@ -10,26 +10,15 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
 	"kpqc.dev"
-	"kpqc.dev/internal/native/aimer128f"
-	"kpqc.dev/internal/native/aimer128s"
-	"kpqc.dev/internal/native/aimer192f"
-	"kpqc.dev/internal/native/aimer192s"
-	"kpqc.dev/internal/native/aimer256f"
-	"kpqc.dev/internal/native/aimer256s"
-	"kpqc.dev/internal/native/haetae2"
-	"kpqc.dev/internal/native/haetae3"
-	"kpqc.dev/internal/native/haetae5"
-	"kpqc.dev/internal/native/ntruplus1152"
-	"kpqc.dev/internal/native/ntruplus768"
-	"kpqc.dev/internal/native/ntruplus864"
-	"kpqc.dev/internal/native/smaugt128"
-	"kpqc.dev/internal/native/smaugt192"
-	"kpqc.dev/internal/native/smaugt256"
-	"kpqc.dev/internal/native/timer"
+	"kpqc.dev/internal/portable/aimer"
+	"kpqc.dev/internal/portable/haetae"
+	"kpqc.dev/internal/portable/ntruplus"
+	"kpqc.dev/internal/portable/smaugt"
 )
 
 type entropyControl struct {
@@ -38,6 +27,14 @@ type entropyControl struct {
 }
 
 func TestKnownAnswerVectors(t *testing.T) {
+	vectorLimit := 100
+	if value := os.Getenv("KPQC_KAT_LIMIT"); value != "" {
+		parsed, err := strconv.Atoi(value)
+		if err != nil || parsed < 1 || parsed > 100 {
+			t.Fatalf("KPQC_KAT_LIMIT must be between 1 and 100, received %q", value)
+		}
+		vectorLimit = parsed
+	}
 	vectorRoot := os.Getenv("KPQC_TEST_VECTORS")
 	if vectorRoot == "" {
 		vectorRoot = filepath.Join("..", "kpqc-test-vectors")
@@ -53,15 +50,15 @@ func TestKnownAnswerVectors(t *testing.T) {
 		entropy   entropyControl
 		seedBytes int
 	}{
-		{kpqc.AIMer128f(), "aimer/128f", false, entropyControl{aimer128f.SetTestEntropy, aimer128f.ClearTestEntropy}, 16},
-		{kpqc.AIMer128s(), "aimer/128s", false, entropyControl{aimer128s.SetTestEntropy, aimer128s.ClearTestEntropy}, 16},
-		{kpqc.AIMer192f(), "aimer/192f", false, entropyControl{aimer192f.SetTestEntropy, aimer192f.ClearTestEntropy}, 24},
-		{kpqc.AIMer192s(), "aimer/192s", false, entropyControl{aimer192s.SetTestEntropy, aimer192s.ClearTestEntropy}, 24},
-		{kpqc.AIMer256f(), "aimer/256f", false, entropyControl{aimer256f.SetTestEntropy, aimer256f.ClearTestEntropy}, 32},
-		{kpqc.AIMer256s(), "aimer/256s", false, entropyControl{aimer256s.SetTestEntropy, aimer256s.ClearTestEntropy}, 32},
-		{kpqc.HAETAE2(), "haetae/mode2", true, entropyControl{haetae2.SetTestEntropy, haetae2.ClearTestEntropy}, 32},
-		{kpqc.HAETAE3(), "haetae/mode3", true, entropyControl{haetae3.SetTestEntropy, haetae3.ClearTestEntropy}, 32},
-		{kpqc.HAETAE5(), "haetae/mode5", true, entropyControl{haetae5.SetTestEntropy, haetae5.ClearTestEntropy}, 32},
+		{kpqc.AIMer128f(), "aimer/128f", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 16},
+		{kpqc.AIMer128s(), "aimer/128s", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 16},
+		{kpqc.AIMer192f(), "aimer/192f", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 24},
+		{kpqc.AIMer192s(), "aimer/192s", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 24},
+		{kpqc.AIMer256f(), "aimer/256f", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 32},
+		{kpqc.AIMer256s(), "aimer/256s", false, entropyControl{aimer.SetTestEntropy, aimer.ClearTestEntropy}, 32},
+		{kpqc.HAETAE2(), "haetae/mode2", true, entropyControl{haetae.SetTestEntropy, haetae.ClearTestEntropy}, 32},
+		{kpqc.HAETAE3(), "haetae/mode3", true, entropyControl{haetae.SetTestEntropy, haetae.ClearTestEntropy}, 32},
+		{kpqc.HAETAE5(), "haetae/mode5", true, entropyControl{haetae.SetTestEntropy, haetae.ClearTestEntropy}, 32},
 	}
 	kems := []struct {
 		algorithm kpqc.KEMAlgorithm
@@ -70,13 +67,13 @@ func TestKnownAnswerVectors(t *testing.T) {
 		keyCalls  int
 		encBytes  int
 	}{
-		{kpqc.NTRUPlus768(), "ntruplus/768", entropyControl{ntruplus768.SetTestEntropy, ntruplus768.ClearTestEntropy}, 0, 96},
-		{kpqc.NTRUPlus864(), "ntruplus/864", entropyControl{ntruplus864.SetTestEntropy, ntruplus864.ClearTestEntropy}, 0, 108},
-		{kpqc.NTRUPlus1152(), "ntruplus/1152", entropyControl{ntruplus1152.SetTestEntropy, ntruplus1152.ClearTestEntropy}, 0, 144},
-		{kpqc.SMAUGT128(), "smaugt/mode1", entropyControl{smaugt128.SetTestEntropy, smaugt128.ClearTestEntropy}, 2, 32},
-		{kpqc.SMAUGT192(), "smaugt/mode3", entropyControl{smaugt192.SetTestEntropy, smaugt192.ClearTestEntropy}, 2, 32},
-		{kpqc.SMAUGT256(), "smaugt/mode5", entropyControl{smaugt256.SetTestEntropy, smaugt256.ClearTestEntropy}, 2, 32},
-		{kpqc.TiMER(), "smaugt/modet", entropyControl{timer.SetTestEntropy, timer.ClearTestEntropy}, 2, 16},
+		{kpqc.NTRUPlus768(), "ntruplus/768", entropyControl{ntruplus.SetTestEntropy, ntruplus.ClearTestEntropy}, 0, 96},
+		{kpqc.NTRUPlus864(), "ntruplus/864", entropyControl{ntruplus.SetTestEntropy, ntruplus.ClearTestEntropy}, 0, 108},
+		{kpqc.NTRUPlus1152(), "ntruplus/1152", entropyControl{ntruplus.SetTestEntropy, ntruplus.ClearTestEntropy}, 0, 144},
+		{kpqc.SMAUGT128(), "smaugt/mode1", entropyControl{smaugt.SetTestEntropy, smaugt.ClearTestEntropy}, 2, 32},
+		{kpqc.SMAUGT192(), "smaugt/mode3", entropyControl{smaugt.SetTestEntropy, smaugt.ClearTestEntropy}, 2, 32},
+		{kpqc.SMAUGT256(), "smaugt/mode5", entropyControl{smaugt.SetTestEntropy, smaugt.ClearTestEntropy}, 2, 32},
+		{kpqc.TiMER(), "smaugt/modet", entropyControl{smaugt.SetTestEntropy, smaugt.ClearTestEntropy}, 2, 16},
 	}
 
 	total := 0
@@ -140,8 +137,8 @@ func TestKnownAnswerVectors(t *testing.T) {
 				t.Fatalf("%s vector %s rejected: valid=%v err=%v", test.algorithm.ID(), vector["count"], valid, err)
 			}
 		})
-		if count != 100 {
-			t.Fatalf("%s: read %d vectors, want 100", test.algorithm.ID(), count)
+		if count != vectorLimit {
+			t.Fatalf("%s: read %d vectors, want %d", test.algorithm.ID(), count, vectorLimit)
 		}
 		total += count
 	}
@@ -191,21 +188,22 @@ func TestKnownAnswerVectors(t *testing.T) {
 				t.Fatalf("%s vector %s produced the wrong shared secret", test.algorithm.ID(), vector["count"])
 			}
 		})
-		if count != 100 {
-			t.Fatalf("%s: read %d vectors, want 100", test.algorithm.ID(), count)
+		if count != vectorLimit {
+			t.Fatalf("%s: read %d vectors, want %d", test.algorithm.ID(), count, vectorLimit)
 		}
 		total += count
 	}
-	if total != 1600 {
-		t.Fatalf("validated %d vectors, want 1600", total)
+	expectedTotal := 16 * vectorLimit
+	if total != expectedTotal {
+		t.Fatalf("validated %d vectors, want %d", total, expectedTotal)
 	}
 }
 
 func TestEntropyFailurePropagates(t *testing.T) {
-	if !aimer128f.SetTestEntropy(nil) {
+	if !aimer.SetTestEntropy(nil) {
 		t.Fatal("could not install failing test entropy")
 	}
-	defer aimer128f.ClearTestEntropy()
+	defer aimer.ClearTestEntropy()
 
 	_, err := kpqc.AIMer128f().GenerateKeyPair()
 	var nativeError *kpqc.NativeError
@@ -264,6 +262,10 @@ func readVectors(t *testing.T, path string, check func(map[string]string)) int {
 	defer file.Close()
 
 	count := 0
+	limit := 100
+	if value := os.Getenv("KPQC_KAT_LIMIT"); value != "" {
+		limit, _ = strconv.Atoi(value)
+	}
 	vector := make(map[string]string)
 	scanner := bufio.NewScanner(file)
 	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
@@ -275,6 +277,9 @@ func readVectors(t *testing.T, path string, check func(map[string]string)) int {
 		if name == "count" && len(vector) != 0 {
 			check(vector)
 			count++
+			if count == limit {
+				return count
+			}
 			vector = make(map[string]string)
 		}
 		vector[name] = value
