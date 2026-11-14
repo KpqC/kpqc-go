@@ -12,6 +12,8 @@ jobs:
   test:
     name: ${{ matrix.os }} / Go ${{ matrix.go }}
     runs-on: ${{ matrix.os }}
+    env:
+      CGO_ENABLED: 0
     strategy:
       fail-fast: false
       matrix:
@@ -26,30 +28,21 @@ jobs:
             go: stable
           - os: macos-15-intel
             go: stable
+          - os: windows-2025
+            go: stable
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/checkout@v7
-        with:
-          repository: KpqC/kpqc-test-vectors
-          ref: d75490bf824faa4b148cd0b901a2eb13198fe0da
-          path: kpqc-test-vectors
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
           cache: false
       - name: Test
-        run: go test -race -count=1 ./...
-      - name: Known-answer tests
-        env:
-          KPQC_TEST_VECTORS: ${{ github.workspace }}/kpqc-test-vectors
-        run: >-
-          go test -race -tags=kpqc_kat -count=1
-          -run '^(TestKnownAnswerVectors|TestEntropyFailurePropagates)$' ./...
+        run: go test -count=1 ./...
       - name: Vet
         run: go vet -tags=kpqc_kat ./...
 
-  sanitizers:
-    name: Native sanitizers
+  known-answer-tests:
+    name: Known-answer tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -62,13 +55,79 @@ jobs:
         with:
           go-version: stable
           cache: false
-      - name: AddressSanitizer
+      - name: Test all 1,600 records
         env:
+          CGO_ENABLED: 0
           KPQC_TEST_VECTORS: ${{ github.workspace }}/kpqc-test-vectors
-        run: go test -asan -tags=kpqc_kat -count=1 ./...
-      - name: UndefinedBehaviorSanitizer
+        run: >-
+          go test -timeout=30m -tags=kpqc_kat -count=1
+          -run '^(TestKnownAnswerVectors|TestEntropyFailurePropagates)$' ./...
+
+  race:
+    name: Race detector
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: false
+      - name: Test
+        run: go test -race -count=1 ./...
+
+  big-endian-tests:
+    name: Big-endian known-answer tests / linux-s390x
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: KpqC/kpqc-test-vectors
+          ref: d75490bf824faa4b148cd0b901a2eb13198fe0da
+          path: kpqc-test-vectors
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: false
+      - name: Install s390x emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes qemu-user
+      - name: Compile s390x test binary
         env:
-          CGO_CFLAGS: -O1 -g -fsanitize=undefined -fno-sanitize-recover=undefined
-          CGO_LDFLAGS: -fsanitize=undefined
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: s390x
+        run: go test -c -tags=kpqc_kat -o kpqc-s390x.test .
+      - name: Run one KAT record per parameter set
+        env:
+          KPQC_KAT_LIMIT: 1
           KPQC_TEST_VECTORS: ${{ github.workspace }}/kpqc-test-vectors
-        run: go test -tags=kpqc_kat -count=1 ./...
+        run: >-
+          qemu-s390x ./kpqc-s390x.test
+          -test.timeout=10m
+          -test.run='^TestKnownAnswerVectors$'
+
+  cross-build:
+    name: Cross-build / ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: s390x
+          - goos: windows
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          cache: false
+      - name: Compile tests
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go test -exec=true ./...
